@@ -7,7 +7,8 @@ import java.io.IOException;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        File file = new File("C:\\Users\\Никита\\Desktop\\african_head.obj");
+        File file = new File(args[0]);
         ObjModel model = ObjUtils.parse(file);
+        System.out.println(model);
     }
 }

@@ -24,7 +24,7 @@ public class Vector {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         for (double x : xs) {
-            builder.append(x + " ");
+            builder.append(x).append(" ");
         }
         return builder.toString();
     }
