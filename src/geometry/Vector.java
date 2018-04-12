@@ -9,15 +9,15 @@ public class Vector {
     private Vector() {
     }
 
-    public Vector(double[] xs) {
-        this.xs = xs;
-    }
-
     public Vector(List<Double> vec) {
         xs = new double[vec.size()];
         for (int i = 0; i < xs.length; i++) {
             xs[i] = vec.get(i);
         }
+    }
+
+    public Vector(double... xs) {
+        this.xs = xs;
     }
 
     @Override

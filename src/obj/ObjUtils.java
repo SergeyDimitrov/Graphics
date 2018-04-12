@@ -21,7 +21,6 @@ public class ObjUtils {
         while ((line = reader.readLine()) != null) {
             if (line.isEmpty()) continue;
             tok = new StringTokenizer(line);
-            System.out.println(line);
             String identifier = tok.nextToken();
             boolean isVector = identifier.equals("v") || identifier.equals("vn") || identifier.equals("vt");
             boolean isFace = identifier.equals("f");
@@ -41,8 +40,6 @@ public class ObjUtils {
                     case "vn":
                         model.addVn(vec);
                         break;
-                    default:
-                        throw new UnsupportedOperationException();
                 }
             }
             if (isFace) {
