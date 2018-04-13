@@ -109,43 +109,31 @@ public class RenderUtils {
 
         int x0 = (int) polygon.get(0).get(0);
         int y0 = (int) polygon.get(0).get(1);
+        int z0 = (int) polygon.get(0).get(2);
         int x1 = (int) polygon.get(1).get(0);
         int y1 = (int) polygon.get(1).get(1);
+        int z1 = (int) polygon.get(1).get(2);
         int x2 = (int) polygon.get(2).get(0);
         int y2 = (int) polygon.get(2).get(1);
+        int z2 = (int) polygon.get(2).get(2);
 
         for (int x = xMin; x <= xMax; x++) {
-            int l = -1;
-            int r = -1;
             for (int y = yMin; y <= yMax; y++) {
-                boolean inside = true;
-                int l0 = (y - y2) * (x1 - x2) - (x - x2) * (y1 - y2);
-                int ll0 = (y0 - y2) * (x1 - x2) - (x0 - x2) * (y1 - y2);
-                int l1 = (y - y0) * (x2 - x0) - (x - x0) * (y2 - y0);
-                int ll1 = (y1 - y0) * (x2 - x0) - (x1 - x0) * (y2 - y0);
-                int l2 = (y - y1) * (x0 - x1) - (x - x1) * (y0 - y1);
-                int ll2 = (y2 - y1) * (x0 - x1) - (x2 - x1) * (y0 - y1);
-                if (l0 * ll0 < 0 || l1 * ll1 < 0 || l2 * ll2 < 0) {
-                    inside = false;
+                // Baricentric coordinates
+                int l0Num = (y - y2) * (x1 - x2) - (x - x2) * (y1 - y2);
+                int l0Den = (y0 - y2) * (x1 - x2) - (x0 - x2) * (y1 - y2);
+                int l1Num = (y - y0) * (x2 - x0) - (x - x0) * (y2 - y0);
+                int l1Den = (y1 - y0) * (x2 - x0) - (x1 - x0) * (y2 - y0);
+                int l2Num = (y - y1) * (x0 - x1) - (x - x1) * (y0 - y1);
+                int l2Den = (y2 - y1) * (x0 - x1) - (x2 - x1) * (y0 - y1);
+                if (l0Num * l0Den < 0 || l1Num * l1Den < 0 || l2Num * l2Den < 0) {
+                    continue;
                 }
-//                for (int k = 0; k < 3; k++) {
-//                    int prev = k - 1;
-//                    int next = k + 1;
-//                    if (prev == -1) prev = 2;
-//                    if (next == 3) next = 0;
-//                    double lamNum = ((y - polygon.get(k).get(1)) * (polygon.get(prev).get(0) - polygon.get(k).get(0))
-//                            - (x - polygon.get(k).get(0)) * (polygon.get(prev).get(1) - polygon.get(k).get(1)));
-//
-//                    double lamDen = ((y - polygon.get(next).get(1)) * (polygon.get(prev).get(0) - polygon.get(k).get(0))
-//                            - (x - polygon.get(next).get(0)) * (polygon.get(prev).get(1) - polygon.get(k).get(1)));
-//
-//                    double lam = lamNum / lamDen;
-//
-//                    if (lam < 0) {
-//                        inside = false;
-//                    }
-//                }
-                if (inside) {
+                double z = 1.0 * l0Num / l0Den * z0 +
+                        1.0 * l1Num / l1Den * z1 +
+                        1.0 * l2Num / l2Den * z2;
+                if (z > zBuf[x][y]) {
+                    zBuf[x][y] = z;
                     setPixel(x, y, image, color);
                 }
             }
@@ -155,7 +143,7 @@ public class RenderUtils {
     public static void render(ObjModel model, BufferedImage image) {
         double[][] zBuf = new double[IMAGE_HEIGHT][IMAGE_WIDTH];
         for (int i = 0; i < zBuf.length; i++) {
-            Arrays.fill(zBuf, Double.MIN_VALUE);
+            Arrays.fill(zBuf[i], Double.MIN_VALUE);
         }
         for (Face f : model.getFaces()) {
             List<PolygonPoint> polygon = f.getPolygonPoints();
@@ -165,7 +153,8 @@ public class RenderUtils {
                 Vector v = model.getV(p.getV());
                 int x = (int) (v.get(0) * IMAGE_WIDTH / 3.) + IMAGE_WIDTH / 2;
                 int y = (int) (v.get(1) * IMAGE_HEIGHT / 3.) + IMAGE_HEIGHT / 2;
-                points.add(new Vector(x, y));
+                int z = (int) (v.get(2) * IMAGE_HEIGHT / 3.) + IMAGE_HEIGHT / 2;
+                points.add(new Vector(x, y, z));
                 pp.add(v);
             }
 
@@ -176,7 +165,8 @@ public class RenderUtils {
             if (intensity <= 0) {
                 continue;
             }
-            int color = new Color((int) (255 * intensity), (int) (255 * intensity), (int) (255 * intensity)).getRGB();
+            int cVal = (int) (255 * intensity);
+            int color = new Color(cVal, cVal, cVal).getRGB();
             for (int j = 0; j < points.size(); j++) {
                 lineBr(points.get(j).get(0), points.get(j).get(1),
                         points.get((j + 1) % points.size()).get(0), points.get((j + 1) % points.size()).get(1),
@@ -185,6 +175,4 @@ public class RenderUtils {
             fillPolygon(points, image, color, zBuf);
         }
     }
-
-
 }

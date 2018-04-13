@@ -7,10 +7,6 @@ import geometry.Vector;
  */
 public class LinearUtils {
 
-    public static double sqr(double x) {
-        return x * x;
-    }
-
     public static Vector sub(Vector a, Vector b) {
         if (a.size() != b.size()) {
             throw new IllegalArgumentException();
@@ -22,13 +18,22 @@ public class LinearUtils {
         return res;
     }
 
+    private static Vector cross3(Vector a, Vector b) {
+        return new Vector(a.get(1) * b.get(2) - a.get(2) * b.get(1),
+                -(a.get(0) * b.get(2) - a.get(2) * b.get(0)),
+                a.get(0) * b.get(1) - a.get(1) * b.get(0));
+    }
+
     public static Vector cross(Vector a, Vector b) {
         if (a.size() != b.size()) {
             throw new IllegalArgumentException();
         }
-        return new Vector(a.get(1) * b.get(2) - a.get(2) * b.get(1),
-                -(a.get(0) * b.get(2) - a.get(2) * b.get(0)),
-                a.get(0) * b.get(1) - a.get(1) * b.get(0));
+
+        if (a.size() == 3) {
+            return cross3(a, b);
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     public static double scalar(Vector a, Vector b) {
