@@ -60,7 +60,11 @@ public class ObjModel {
         return fs;
     }
 
-    public Vector getV(int ind) {
-        return vs.get(ind - 1);
+    public Vector getV(int vInd) {
+        return vs.get(vInd - 1);
+    }
+
+    public Vector getVt(int vtInd) {
+        return vts.get(vtInd - 1);
     }
 }

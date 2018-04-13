@@ -7,7 +7,6 @@ import obj.ObjModel;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,6 +19,14 @@ import static utils.LinearUtils.*;
 public class RenderUtils {
     public static final int IMAGE_WIDTH = 800;
     public static final int IMAGE_HEIGHT = 800;
+
+    private static int getX(double x) {
+        return (int) (x * IMAGE_WIDTH / 3.) + IMAGE_WIDTH / 2;
+    }
+
+    private static int getY(double y) {
+        return (int) (y * IMAGE_HEIGHT / 3.) + IMAGE_HEIGHT / 2;
+    }
 
     private static void setPixel(int x, int y, BufferedImage image, int color, boolean inv) {
         if (inv) {
@@ -85,11 +92,7 @@ public class RenderUtils {
         }
     }
 
-    private static void lineBr(double x0, double y0, double x1, double y1, BufferedImage image, int color) {
-        lineBr((int) x0, (int) y0, (int) x1, (int) y1, image, color);
-    }
-
-    private static void fillPolygon(List<Vector> polygon, BufferedImage image, int color, double[][] zBuf) {
+    private static void fillPolygon(ObjModel model, List<PolygonPoint> polygon, BufferedImage image, double intensity, BufferedImage texture, double[][] zBuf) {
         if (polygon.size() != 3) {
             return;
         }
@@ -98,28 +101,48 @@ public class RenderUtils {
         int xMin = Integer.MAX_VALUE;
         int yMax = xMax;
         int yMin = xMin;
-        for (Vector v : polygon) {
-            int x = (int) v.get(0);
-            int y = (int) v.get(1);
+
+        for (PolygonPoint v : polygon) {
+            int vInd = v.getVind();
+            Vector point = model.getV(vInd);
+            int x = getX(point.get(0));
+            int y = getY(point.get(1));
             xMax = max(x, xMax);
             xMin = min(x, xMin);
             yMax = max(y, yMax);
             yMin = min(y, yMin);
         }
 
-        int x0 = (int) polygon.get(0).get(0);
-        int y0 = (int) polygon.get(0).get(1);
-        int z0 = (int) polygon.get(0).get(2);
-        int x1 = (int) polygon.get(1).get(0);
-        int y1 = (int) polygon.get(1).get(1);
-        int z1 = (int) polygon.get(1).get(2);
-        int x2 = (int) polygon.get(2).get(0);
-        int y2 = (int) polygon.get(2).get(1);
-        int z2 = (int) polygon.get(2).get(2);
+        int vInd = polygon.get(0).getVind();
+        int vtInd = polygon.get(0).getVtInd();
+        Vector point = model.getV(vInd);
+        int x0 = getX(point.get(0));
+        int y0 = getY(point.get(1));
+        double z0 = point.get(2);
+        double xt0 = model.getVt(vtInd).get(0);
+        double yt0 = model.getVt(vtInd).get(1);
+
+        vInd = polygon.get(1).getVind();
+        vtInd = polygon.get(1).getVtInd();
+        point = model.getV(vInd);
+        int x1 = getX(point.get(0));
+        int y1 = getY(point.get(1));
+        double z1 = point.get(2);
+        double xt1 = model.getVt(vtInd).get(0);
+        double yt1 = model.getVt(vtInd).get(1);
+
+        vInd = polygon.get(2).getVind();
+        vtInd = polygon.get(2).getVtInd();
+        point = model.getV(vInd);
+        int x2 = getX(point.get(0));
+        int y2 = getY(point.get(1));
+        double z2 = point.get(2);
+        double xt2 = model.getVt(vtInd).get(0);
+        double yt2 = model.getVt(vtInd).get(1);
 
         for (int x = xMin; x <= xMax; x++) {
             for (int y = yMin; y <= yMax; y++) {
-                // Baricentric coordinates
+                // Barycentric coordinates
                 int l0Num = (y - y2) * (x1 - x2) - (x - x2) * (y1 - y2);
                 int l0Den = (y0 - y2) * (x1 - x2) - (x0 - x2) * (y1 - y2);
                 int l1Num = (y - y0) * (x2 - x0) - (x - x0) * (y2 - y0);
@@ -132,47 +155,46 @@ public class RenderUtils {
                 double z = 1.0 * l0Num / l0Den * z0 +
                         1.0 * l1Num / l1Den * z1 +
                         1.0 * l2Num / l2Den * z2;
+
                 if (z > zBuf[x][y]) {
                     zBuf[x][y] = z;
-                    setPixel(x, y, image, color);
+                    double textX = xt0 * l0Num / l0Den +
+                            xt1 * l1Num / l1Den +
+                            xt2 * l2Num / l2Den;
+
+                    double textY = yt0 * l0Num / l0Den +
+                            yt1 * l1Num / l1Den +
+                            yt2 * l2Num / l2Den;
+
+                    int textPixelX = (int) (textX * texture.getWidth());
+                    int textPixelY = (int) (textY * texture.getHeight());
+                    Color primColor = new Color(texture.getRGB(textPixelX, textPixelY));
+                    Color colorToSet = new Color((int) (primColor.getRed() * intensity),
+                            (int) (primColor.getGreen() * intensity),
+                            (int) (primColor.getBlue() * intensity));
+                    setPixel(x, y, image, colorToSet.getRGB());
                 }
             }
         }
     }
 
-    public static void render(ObjModel model, BufferedImage image) {
+    public static void render(ObjModel model, BufferedImage texture, BufferedImage image) {
         double[][] zBuf = new double[IMAGE_HEIGHT][IMAGE_WIDTH];
         for (int i = 0; i < zBuf.length; i++) {
             Arrays.fill(zBuf[i], Double.MIN_VALUE);
         }
         for (Face f : model.getFaces()) {
             List<PolygonPoint> polygon = f.getPolygonPoints();
-            List<Vector> points = new ArrayList<>();
-            List<Vector> pp = new ArrayList<>();
-            for (PolygonPoint p : polygon) {
-                Vector v = model.getV(p.getV());
-                int x = (int) (v.get(0) * IMAGE_WIDTH / 3.) + IMAGE_WIDTH / 2;
-                int y = (int) (v.get(1) * IMAGE_HEIGHT / 3.) + IMAGE_HEIGHT / 2;
-                int z = (int) (v.get(2) * IMAGE_HEIGHT / 3.) + IMAGE_HEIGHT / 2;
-                points.add(new Vector(x, y, z));
-                pp.add(v);
-            }
 
-            Vector n = cross(sub(pp.get(2), pp.get(0)), sub(pp.get(1), pp.get(0)));
+            Vector n = cross(sub(model.getV(polygon.get(2).getVind()), model.getV(polygon.get(0).getVind())), sub(model.getV(polygon.get(1).getVind()), model.getV(polygon.get(0).getVind())));
             n.normalize();
             Vector light = new Vector(0, 0, -1);
             double intensity = scalar(n, light);
             if (intensity <= 0) {
                 continue;
             }
-            int cVal = (int) (255 * intensity);
-            int color = new Color(cVal, cVal, cVal).getRGB();
-            for (int j = 0; j < points.size(); j++) {
-                lineBr(points.get(j).get(0), points.get(j).get(1),
-                        points.get((j + 1) % points.size()).get(0), points.get((j + 1) % points.size()).get(1),
-                        image, color);
-            }
-            fillPolygon(points, image, color, zBuf);
+
+            fillPolygon(model, polygon, image, intensity, texture, zBuf);
         }
     }
 }

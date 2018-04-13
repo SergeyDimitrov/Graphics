@@ -8,9 +8,6 @@ public class Vector {
 
     private double[] xs;
 
-    private Vector() {
-    }
-
     public Vector(int n) {
         xs = new double[n];
     }

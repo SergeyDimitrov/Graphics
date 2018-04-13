@@ -37,7 +37,11 @@ public class PolygonPoint {
         return builder.toString();
     }
 
-    public int getV() {
+    public int getVind() {
         return vInd;
+    }
+
+    public int getVtInd() {
+        return vtInd;
     }
 }
