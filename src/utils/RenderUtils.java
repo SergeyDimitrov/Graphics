@@ -188,7 +188,7 @@ public class RenderUtils {
     public static void render(ObjModel model, BufferedImage texture, BufferedImage image) {
         double[][] zBuf = new double[IMAGE_HEIGHT][IMAGE_WIDTH];
         for (double[] aZBuf : zBuf) {
-            Arrays.fill(aZBuf, Double.MIN_VALUE);
+            Arrays.fill(aZBuf, Double.NEGATIVE_INFINITY);
         }
         for (Face f : model.getFaces()) {
             List<PolygonPoint> polygon = f.getPolygonPoints();
