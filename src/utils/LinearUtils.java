@@ -7,24 +7,24 @@ import geometry.Vector;
  */
 public class LinearUtils {
 
-    public static Vector sub(Vector a, Vector b) {
+    public static Vector<Double> sub(Vector<Double> a, Vector<Double> b) {
         if (a.size() != b.size()) {
             throw new IllegalArgumentException();
         }
-        Vector res = new Vector(a.size());
+        Vector<Double> res = new Vector<>(a.size());
         for (int i = 0; i < res.size(); i++) {
             res.set(i, a.get(i) - b.get(i));
         }
         return res;
     }
 
-    private static Vector cross3(Vector a, Vector b) {
-        return new Vector(a.get(1) * b.get(2) - a.get(2) * b.get(1),
+    private static Vector<Double> cross3(Vector<Double> a, Vector<Double> b) {
+        return new Vector<>(a.get(1) * b.get(2) - a.get(2) * b.get(1),
                 -(a.get(0) * b.get(2) - a.get(2) * b.get(0)),
                 a.get(0) * b.get(1) - a.get(1) * b.get(0));
     }
 
-    public static Vector cross(Vector a, Vector b) {
+    public static Vector<Double> cross(Vector<Double> a, Vector<Double> b) {
         if (a.size() != b.size()) {
             throw new IllegalArgumentException();
         }
@@ -36,7 +36,7 @@ public class LinearUtils {
         }
     }
 
-    public static double scalar(Vector a, Vector b) {
+    public static double scalar(Vector<Double> a, Vector<Double> b) {
         if (a.size() != b.size()) {
             throw new IllegalArgumentException();
         }

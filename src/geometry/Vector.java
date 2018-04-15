@@ -2,41 +2,41 @@ package geometry;
 
 import java.util.List;
 
-import static java.lang.StrictMath.sqrt;
+import static java.lang.Math.sqrt;
 
-public class Vector {
+public class Vector<T extends Number> {
 
-    private double[] xs;
+    private T[] xs;
 
     public Vector(int n) {
-        xs = new double[n];
+        xs = (T[]) new Number[n];
     }
 
-    public Vector(List<Double> vec) {
-        xs = new double[vec.size()];
+    public Vector(List<T> vec) {
+        xs = (T[]) new Number[vec.size()];
         for (int i = 0; i < xs.length; i++) {
             xs[i] = vec.get(i);
         }
     }
 
-    public Vector(double... xs) {
+    public Vector(T... xs) {
         this.xs = xs;
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        for (double x : xs) {
+        for (T x : xs) {
             builder.append(x).append(" ");
         }
         return builder.toString();
     }
 
-    public double get(int i) {
+    public T get(int i) {
         return xs[i];
     }
 
-    public void set(int i, double x) {
+    public void set(int i, T x) {
         xs[i] = x;
     }
 
@@ -46,8 +46,8 @@ public class Vector {
 
     public double len() {
         double res = 0;
-        for (double x : xs) {
-            res += x * x;
+        for (T x : xs) {
+            res += x.doubleValue() * x.doubleValue();
         }
         return sqrt(res);
     }
@@ -55,7 +55,8 @@ public class Vector {
     public void normalize() {
         double len = len();
         for (int i = 0; i < xs.length; i++) {
-            xs[i] /= len;
+            Double newVal = xs[i].doubleValue() / len;
+            xs[i] = (T) newVal;
         }
     }
 }

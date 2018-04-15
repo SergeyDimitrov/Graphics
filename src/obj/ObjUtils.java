@@ -29,7 +29,7 @@ public class ObjUtils {
                 while (tok.hasMoreTokens()) {
                     vectorList.add(Double.parseDouble(tok.nextToken()));
                 }
-                Vector vec = new Vector(vectorList);
+                Vector<Double> vec = new Vector<>(vectorList);
                 switch (identifier) {
                     case "v":
                         model.addV(vec);

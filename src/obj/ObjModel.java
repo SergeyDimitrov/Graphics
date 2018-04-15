@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ObjModel {
-    private List<Vector> vs;
-    private List<Vector> vts;
-    private List<Vector> vns;
+    private List<Vector<Double>> vs;
+    private List<Vector<Double>> vts;
+    private List<Vector<Double>> vns;
     private List<Face> fs;
 
     public ObjModel() {
@@ -19,15 +19,15 @@ public class ObjModel {
         fs = new ArrayList<>();
     }
 
-    public void addV(Vector v) {
+    public void addV(Vector<Double> v) {
         vs.add(v);
     }
 
-    public void addVt(Vector vt) {
+    public void addVt(Vector<Double> vt) {
         vts.add(vt);
     }
 
-    public void addVn(Vector vn) {
+    public void addVn(Vector<Double> vn) {
         vns.add(vn);
     }
 
@@ -38,15 +38,15 @@ public class ObjModel {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        for (Vector v : vs) {
+        for (Vector<Double> v : vs) {
             builder.append("v ").append(v).append("\n");
         }
         builder.append("\n");
-        for (Vector v : vts) {
+        for (Vector<Double> v : vts) {
             builder.append("vt ").append(v).append("\n");
         }
         builder.append("\n");
-        for (Vector v : vns) {
+        for (Vector<Double> v : vns) {
             builder.append("vn ").append(v).append("\n");
         }
         builder.append("\n");
@@ -60,11 +60,11 @@ public class ObjModel {
         return fs;
     }
 
-    public Vector getV(int vInd) {
+    public Vector<Double> getV(int vInd) {
         return vs.get(vInd - 1);
     }
 
-    public Vector getVt(int vtInd) {
+    public Vector<Double> getVt(int vtInd) {
         return vts.get(vtInd - 1);
     }
 }
